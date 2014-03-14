@@ -1,0 +1,85 @@
+﻿<Window x:Class="NETDllViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:NETDllViewer="clr-namespace:NETDllViewer"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:syswindows="clr-namespace:System.Windows;assembly=PresentationFramework"
+        Title=".NET Assembly Viewer" Name="mainWindow" MinHeight="300" MinWidth="300"
+        AllowDrop="True"
+        Drop="mainWindow_Drop" Loaded="mainWindow_Loaded">
+    <Window.Resources>
+        <NETDllViewer:AssemblyView x:Key="Viewer"/>
+
+        <HierarchicalDataTemplate x:Key="GreenItemTemplate">
+            <TextBlock Text="{Binding}">                                
+                <TextBlock.Style>
+                    <Style>                                       
+                        <Setter Property="TextBlock.Foreground" Value="Green"></Setter>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </HierarchicalDataTemplate>
+
+        <CollectionViewSource x:Key="collectionInterfaces" Filter="CollectionViewSource_Filter"
+                Source="{Binding  ElementName=lstClasses, Path=SelectedItem, Converter={x:Static NETDllViewer:ClassToInterfacesConverter.Default}, Mode=OneWay}">
+        </CollectionViewSource>
+
+        <CollectionViewSource x:Key="collectionMethods" Filter="CollectionViewSource_Filter"
+                Source="{Binding  ElementName=lstClasses, Path=SelectedItem, Converter={x:Static NETDllViewer:ClassToMethodsConverter.Default}, Mode=OneWay}">
+        </CollectionViewSource>
+        <syswindows:GridLength  x:Key="TextGridColumWidth">150</syswindows:GridLength>
+        
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="Open" Executed="CommandBinding_Executed" CanExecute="CommandBinding_CanExecute"/>            
+    </Window.CommandBindings>
+    <DockPanel LastChildFill="True">
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Open File" Command="Open" ></MenuItem>
+        </Menu>
+        <TextBlock DockPanel.Dock="Top" Name="lblAssemblyName" Text="{Binding Source={StaticResource Viewer}, Path=UsingAssembly.FullName, Mode=OneWay}"></TextBlock>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Right">
+            <TextBlock Margin="0,0,5,0">Filter</TextBlock>
+            <TextBox Name="txtFilter" MinWidth="150" TextChanged="txtFilter_TextChanged"></TextBox>
+            <!--<TextBox Name="txtFilter" MinWidth="150" Text="{Binding FilterText}"></TextBox>-->
+        </StackPanel>
+        <Grid DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{StaticResource TextGridColumWidth}"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0">Selected Interface</TextBlock>
+            <TextBlock Grid.Column="1" Name="txtSelectedInterface"  Text="{Binding ElementName=lstInterfaces, Path=SelectedItem}" ></TextBlock>
+        </Grid>
+        <Grid DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{StaticResource TextGridColumWidth}"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0">Selected Method</TextBlock>
+            <TextBlock Grid.Column="1" Name="txtSelectedMethod"     Text="{Binding ElementName=lstMethods, Path=SelectedItem}"></TextBlock>
+        </Grid>
+        <Grid DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{StaticResource TextGridColumWidth}"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0">Selected Class</TextBlock>
+            <TextBlock Grid.Column="1" Name="txtSelectedClass"      Text="{Binding ElementName=lstClasses, Path=SelectedItem}"></TextBlock>
+        </Grid>        
+        <DockPanel DockPanel.Dock="Left">
+            <TextBlock DockPanel.Dock="Top" Width="{Binding ElementName=lstClasses, Path=Width}" HorizontalAlignment="Center">Classes</TextBlock>
+            <ListBox DockPanel.Dock="Top" Name="lstClasses" ItemsSource="{Binding Source={StaticResource Viewer}, Path=Classes, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch" MinWidth="100" MinHeight="100" />
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Right">
+            <TextBlock DockPanel.Dock="Top" Width="{Binding ElementName=lstInterfaces, Path=Width}" HorizontalAlignment="Center">Interfaces</TextBlock>
+            <!--<ListBox DockPanel.Dock="Right"  Name="lstInterfaces"    ItemsSource="{Binding  ElementName=lstClasses, Path=SelectedItem, Converter={x:Static NETDllViewer:ClassToInterfacesConverter.Default}, Mode=OneWay}" VerticalAlignment="Stretch" MinWidth="100" MinHeight="100"/>-->
+            <ListBox DockPanel.Dock="Top" Name="lstInterfaces"    ItemsSource="{Binding Source={StaticResource collectionInterfaces}}" VerticalAlignment="Stretch" MinWidth="100" MinHeight="100"/>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Right">
+            <TextBlock DockPanel.Dock="Top" Width="{Binding ElementName=lstMethods, Path=Width}" HorizontalAlignment="Center">Methods</TextBlock>
+            <!--<ListBox DockPanel.Dock="Right"  Name="lstMethods"       ItemsSource="{Binding  ElementName=lstClasses, Path=SelectedItem, Converter={x:Static NETDllViewer:ClassToMethodsConverter.Default}, Mode=OneWay}" VerticalAlignment="Stretch" MinWidth="100" MinHeight="100" />-->
+            <ListBox DockPanel.Dock="Top" Name="lstMethods"       ItemsSource="{Binding Source={StaticResource collectionMethods}}" VerticalAlignment="Stretch" MinWidth="100" MinHeight="100" />
+        </DockPanel>
+    </DockPanel>
+</Window>
